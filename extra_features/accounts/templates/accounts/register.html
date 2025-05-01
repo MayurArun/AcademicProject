@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Manage Accounts</title>
+
+    <!-- Bootstrap & FontAwesome -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(to right, #00c6ff, #0072ff);
+            color: white;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px;
+        }
+        .form-control {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        .form-control::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        .form-group label {
+            color: white;
+        }
+        .btn-dark {
+            margin-bottom: 20px;
+        }
+        .account-list {
+            margin-top: 20px;
+            width: 100%;
+            max-width: 800px;
+        }
+        .account-item {
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .account-item button {
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1 class="mb-3">Admin Panel - Manage Accounts</h1>
+<div class="position-absolute" style="top: 20px; right: 20px;">
+    <a href="http://127.0.0.1:5000" class="btn btn-dark">← Back</a>
+</div>
+
+
+        <!-- Create Account Form -->
+        <form id="registerForm" method="post" class="w-100" style="max-width: 600px;">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="role">Select Role</label>
+                <select class="form-control" id="role" name="role" onchange="toggleStudentFields()">
+                    <option value="teacher">Teacher</option>
+                    <option value="student">Student</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" class="form-control" id="username" name="username" required>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" class="form-control" id="email" name="email" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" class="form-control" id="password" name="password" required>
+                <div class="form-check mt-2">
+                    <input type="checkbox" class="form-check-input" id="showPassword" onclick="togglePasswordVisibility()">
+                    <label class="form-check-label" for="showPassword">Show Password</label>
+                </div>
+            </div>
+
+            <div id="studentFields" style="display: none;">
+                <div class="form-group">
+                    <label for="full_name">Full Name</label>
+                    <input type="text" class="form-control" id="full_name" name="full_name">
+                </div>
+                <div class="form-group">
+                    <label for="roll_number">Roll Number</label>
+                    <input type="text" class="form-control" id="roll_number" name="roll_number">
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary mt-2">Create Account</button>
+        </form>
+
+        <!-- List of Accounts -->
+        <div class="account-list">
+            <h2>All Accounts</h2>
+            <div id="accountList">
+                <!-- Fetched accounts will appear here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+
+    <script>
+        function toggleStudentFields() {
+            const role = document.getElementById('role').value;
+            document.getElementById('studentFields').style.display = (role === 'student') ? 'block' : 'none';
+        }
+
+        function togglePasswordVisibility() {
+            const pwd = document.getElementById('password');
+            pwd.type = pwd.type === 'password' ? 'text' : 'password';
+        }
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let cookie of cookies) {
+                    cookie = cookie.trim();
+                    if (cookie.startsWith(name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        function fetchAccounts() {
+            $.ajax({
+                url: '/get_all_accounts/',
+                method: 'GET',
+                success: function(response) {
+                    $('#accountList').empty();
+                    response.accounts.forEach(function(account) {
+                        $('#accountList').append(`
+                            <div class="account-item">
+                                <div>
+                                    <strong>Username:</strong> ${account.username}<br>
+                                    <strong>Email:</strong> ${account.email}<br>
+                                    <strong>Role:</strong> ${account.role}<br>
+                                    ${account.full_name ? `<strong>Full Name:</strong> ${account.full_name}<br>` : ''}
+                                    ${account.roll_number ? `<strong>Roll Number:</strong> ${account.roll_number}<br>` : ''}
+                                </div>
+                                <div>
+                                    <button class="btn btn-warning btn-sm" onclick="window.location.href='/edit_account/${account.id}/'">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </button>
+                                    <button class="btn btn-danger btn-sm" onclick="deleteAccount(${account.id})">
+                                        <i class="fas fa-trash"></i> Delete
+                                    </button>
+                                </div>
+                            </div>
+                        `);
+                    });
+                }
+            });
+        }
+
+        function deleteAccount(accountId) {
+            if (confirm('Are you sure you want to delete this account?')) {
+                $.ajax({
+                    url: `/delete_account/${accountId}/`,
+                    method: 'POST',
+                    data: {
+                        csrfmiddlewaretoken: getCookie('csrftoken')
+                    },
+                    success: function(response) {
+                        if (response.status === 'success') {
+                            fetchAccounts();
+                        }
+                    },
+                    error: function() {
+                        alert('Error deleting account.');
+                    }
+                });
+            }
+        }
+
+        $(document).ready(function() {
+            fetchAccounts();
+
+            $('#registerForm').on('submit', function(event) {
+                event.preventDefault();
+                $.ajax({
+                    url: '/register/',
+                    method: 'POST',
+                    data: {
+                        role: $('#role').val(),
+                        username: $('#username').val(),
+                        email: $('#email').val(),
+                        password: $('#password').val(),
+                        full_name: $('#full_name').val(),
+                        roll_number: $('#roll_number').val(),
+                        csrfmiddlewaretoken: getCookie('csrftoken')
+                    },
+                    success: function(response) {
+                        if (response.status === 'success') {
+                            alert('Account created successfully.');
+                            fetchAccounts();
+                        } else {
+                            alert(response.message);
+                        }
+                    },
+                    error: function() {
+                        alert('An error occurred. Please try again.');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

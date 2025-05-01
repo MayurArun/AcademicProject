@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Quizzes</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(to right, #00c6ff, #0072ff);
+            color: white;
+            height: 100vh; /* Full height */
+            display: flex;
+            flex-direction: column;
+        }
+        .container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px; /* Add padding for better spacing */
+        }
+        .list-group-item {
+            background-color: rgba(255, 255, 255, 0.1); /* Darker semi-transparent white */
+            color: white; /* Text color */
+            margin-bottom: 10px; /* Add space between items */
+        }
+        .btn-primary {
+            background-color: #007bff; /* Primary button color */
+            border-color: #007bff; /* Primary button border color */
+        }
+        .btn-info {
+            background-color: #17a2b8; /* Info button color */
+            border-color: #17a2b8; /* Info button border color */
+        }
+        .btn-danger {
+            background-color: #dc3545; /* Danger button color */
+            border-color: #dc3545; /* Danger button border color */
+        }
+        h1 {
+            color: white; /* Heading color */
+        }
+        .top-buttons {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            gap: 10px;
+        }
+    </style>
+</head>
+<body>
+        <!-- Logout and Back to Dashboard Buttons -->
+        <div class="top-buttons">
+            <a href="/logout/" class="btn btn-danger btn-sm">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        {% if class.teacher.id == request.session.user_id %}
+        <!-- Teacher: Main Dashboard -->
+        <a href="/teacher_dashboard/" class="btn btn-warning btn-sm">
+            <i class="fas fa-home"></i> Main Dashboard
+        </a>
+    {% else %}
+        <!-- Student: Main Dashboard -->
+        <a href="/student_dashboard/" class="btn btn-warning btn-sm">
+            <i class="fas fa-home"></i> Main Dashboard
+        </a>
+    {% endif %}
+        </div>
+
+    <div class="container">
+        <h1>Quizzes for {{ class.name }}</h1>
+        <div class="list-group mt-3">
+            {% for quiz in quizzes %}
+                <div class="list-group-item">
+                    <h5>{{ quiz.title }}</h5>
+                    <p>Created at: {{ quiz.created_at }}</p>
+                    {% if class.teacher.id == request.session.user_id %}
+                        <a href="/classes/view_quiz_grades/{{ quiz.id }}/" class="btn btn-info">View Grades</a>
+                        <form method="post" action="{% url 'classes:delete_quiz' quiz.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger btn-sm" style="margin-top:10px">Delete Quiz</button>
+                        </form>
+                    {% else %}
+                        <a href="/classes/take_quiz/{{ quiz.id }}/" class="btn btn-primary">Take Quiz</a>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>

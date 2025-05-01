@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Join Class</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(to right, #00c6ff, #0072ff);
+            color: white;
+            height: 100vh; /* Full height */
+            display: flex;
+            flex-direction: column;
+        }
+        .container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px; /* Add padding for better spacing */
+        }
+        .form-control {
+            background-color: rgba(255, 255, 255, 0.1); /* Semi-transparent background for inputs */
+            color: white; /* Text color */
+        }
+        .form-control::placeholder {
+            color: rgba(255, 255, 255, 0.7); /* Placeholder color */
+        }
+        .form-group label {
+            color: white; /* Label color */
+        }
+        .btn-primary {
+            background-color: #007bff; /* Primary button color */
+            border-color: #007bff; /* Primary button border color */
+        }
+        h1 {
+            color: white; /* Heading color */
+        }
+        .top-buttons {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            gap: 10px;
+        }
+    </style>
+            <!-- Logout and Back to Dashboard Buttons -->
+            <div class="top-buttons">
+                <a href="/logout/" class="btn btn-danger btn-sm">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+                <a href="/student_dashboard/" class="btn btn-secondary btn-sm">
+                    <i class="fas fa-home"></i> Dashboard
+                </a>
+            </div>
+</head>
+<body>
+    <div class="container">
+        <h1>Join Class</h1>
+        <form id="joinClassForm" method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="class_code">Class Code</label>
+                <input type="text" class="form-control" id="class_code" name="class_code" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Join Class</button>
+        </form>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#joinClassForm').on('submit', function(event) {
+                event.preventDefault();
+                $.ajax({
+                    url: '/classes/join_class/',
+                    method: 'POST',
+                    data: {
+                        class_code: $('#class_code').val(),
+                        csrfmiddlewaretoken: getCookie('csrftoken'),
+                    },
+                    success: function(response) {
+                        if (response.status === 'success') {
+                            alert('Class joined successfully.');
+                            window.location.href = '/student_dashboard/';
+                        } else {
+                            alert('An error occurred. Please try again.');
+                        }
+                    },
+                    error: function() {
+                        alert('An error occurred. Please try again.');
+                    }
+                });
+            });
+        });
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = jQuery.trim(cookies[i]);
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    </script>
+</body>
+</html>

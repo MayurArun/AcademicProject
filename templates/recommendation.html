@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recommendations</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h2>Content-Based Recommendations:</h2>
+    <ul>
+        {% for rec in content_based_rec %}
+        <li>{{ rec }}</li>
+        {% endfor %}
+    </ul>
+
+    <h2>Collaborative Filtering Recommendations:</h2>
+    <ul>
+        {% for rec in collaborative_filtering_rec %}
+        <li>{{ rec }}</li>
+        {% endfor %}
+    </ul>
+
+    <h2>Hybrid Recommendations:</h2>
+    <ul>
+        {% for rec in hybrid_rec %}
+        <li>{{ rec }}</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

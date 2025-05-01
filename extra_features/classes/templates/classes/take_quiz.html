@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Take Quiz</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(to right, #00c6ff, #0072ff);
+            color: white;
+            height: 100vh; /* Full height */
+            display: flex;
+            flex-direction: column;
+        }
+        .container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: start;
+            padding: 20px; /* Add padding for better spacing */
+        }
+        .card {
+            background-color: rgba(255, 255, 255, 0.1); /* Semi-transparent background for cards */
+            border-color: rgba(255, 255, 255, 0.3); /* Lighter border for cards */
+        }
+        .card-body {
+            color: white; /* Text color */
+        }
+        .form-check-input {
+            accent-color: #007bff; /* Color of the radio button */
+        }
+        .form-check-label {
+            color: white; /* Label color */
+        }
+        .btn-primary {
+            background-color: #007bff; /* Primary button color */
+            border-color: #007bff; /* Primary button border color */
+        }
+        h1 {
+            color: white; /* Heading color */
+        }
+        .top-buttons {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            gap: 10px;
+        }
+        .timer {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Buttons: Logout, Main Dashboard, and Class Dashboard -->
+    <div class="top-buttons">
+        <a href="/logout/" class="btn btn-danger btn-sm">
+            <i class="fas fa-sign-out-alt"></i> Logout
+        </a>
+        <a href="/classes/class_dashboard/{{ quiz.class_obj.class_code }}/" class="btn btn-info btn-sm">
+            <i class="fas fa-chalkboard"></i> Class Dashboard
+        </a>
+        <a href="/student_dashboard/" class="btn btn-warning btn-sm">
+            <i class="fas fa-home"></i> Main Dashboard
+        </a>
+    </div>
+    <div class="container">
+        <h1>{{ quiz.title }}</h1>
+        <div class="timer" id="timer">Time Remaining: {{ quiz.time_limit }}:00</div>
+        <form id="quizForm" method="post">
+            {% csrf_token %}
+            {% for question in quiz.questions.all %}
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ question.text }}</h5>
+                        {% for option in question.options.all %}
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="question_{{ question.id }}" id="option_{{ option.id }}" value="{{ option.id }}" required>
+                                <label class="form-check-label" for="option_{{ option.id }}">{{ option.text }}</label>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endfor %}
+            <button type="submit" class="btn btn-primary">Submit Quiz</button>
+        </form>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            let timeLimit = {{ quiz.time_limit }} * 60; // Convert minutes to seconds
+            let timer = setInterval(function() {
+                if (timeLimit <= 0) {
+                    clearInterval(timer);
+                    $('#quizForm').submit(); // Automatically submit the form when time is up
+                } else {
+                    timeLimit--;
+                    let minutes = Math.floor(timeLimit / 60);
+                    let seconds = timeLimit % 60;
+                    $('#timer').text(`Time Remaining: ${minutes}:${seconds < 10 ? '0' + seconds : seconds}`);
+                }
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

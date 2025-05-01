@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Submissions</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(to right, #00c6ff, #0072ff);
+            color: white;
+            height: 100vh; /* Full height */
+            overflow: hidden; /* Prevent scrolling */
+            display: flex;
+            flex-direction: column;
+        }
+        body {
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(to right, #00c6ff, #0072ff);
+            color: white;
+        }
+        
+        .container {
+            max-width: 800px; /* Set a maximum width for the container */
+            margin: 20px auto; /* Center the container */
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.1); /* Semi-transparent background */
+            border-radius: 10px; /* Rounded corners */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Subtle shadow */
+        }
+        
+        h1 {
+            text-align: center; /* Center the heading */
+            margin-bottom: 20px; /* Space below the heading */
+        }
+        
+        .list-group {
+            margin-top: 20px; /* Space above the list group */
+        }
+        
+        .list-group-item {
+            background-color: rgba(255, 255, 255, 0.2); /* Darker semi-transparent background for list items */
+            border: none; /* Remove border */
+            border-radius: 8px; /* Rounded corners */
+            padding: 15px; /* Padding inside list items */
+            margin-bottom: 15px; /* Space between list items */
+            color: white; /* Text color */
+        }
+        
+        .list-group-item h5 {
+            margin: 0; /* Remove default margin */
+        }
+        .footer {
+            position: fixed;
+            bottom: 10px;
+            left: 10px;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+
+    <div class="container">
+        <h1>Submissions for {{ assignment.title }}</h1>
+        <div class="list-group mt-3">
+            {% for submission in submissions %}
+                <div class="list-group-item">
+                    <h5>{{ submission.student.get_full_name }}</h5>
+                    <p>{{ submission.text }}</p>
+                    {% for file in submission.files.all %}
+                    <a href="{{ file.file.url }}" target="_blank" class="btn btn-secondary btn-sm">Download {{ file.file.name }}</a> 
+                    {% endfor %}
+                    <form class="grade-form" data-submission-id="{{ submission.id }}">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="grade">Grade</label>
+                            <input type="number" class="form-control grade-input" step="0.01" min="0" max="100" value="{{ submission.grade|default_if_none:'' }}">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Save Grade</button>
+                    </form>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('.grade-form').on('submit', function(event) {
+                event.preventDefault();
+                var form = $(this);
+                var submissionId = form.data('submission-id');
+                var grade = form.find('.grade-input').val();
+
+                $.ajax({
+                    url: '/classes/grade_submission/' + submissionId + '/',
+                    method: 'POST',
+                    data: {
+                        grade: grade,
+                        csrfmiddlewaretoken: form.find('input[name="csrfmiddlewaretoken"]').val(),
+                    },
+                    success: function(response) {
+                        if (response.status === 'success') {
+                            alert('Grade saved successfully.');
+                        } else {
+                            alert('Error: ' + response.message);
+                        }
+                    },
+                    error: function() {
+                        alert('An error occurred. Please try again.');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

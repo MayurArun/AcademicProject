@@ -1,0 +1,124 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f5f5f5;
+}
+
+#container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    height: 100vh;
+}
+
+h1 {
+    margin-top: 20px;
+}
+
+
+#search-bar {
+    width: 500px;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #dfe1e5;
+    border-radius: 24px;
+    outline: none;
+    box-shadow: none;
+    transition: box-shadow 0.3s;
+}
+
+#search-bar:focus {
+    box-shadow: 0 0 10px rgba(32, 33, 36, 0.1);
+}
+
+#suggestions {
+    width: 500px;
+    background-color: white;
+    border: 1px solid #ccc;
+    border-top: none;
+    display: none;
+}
+
+.suggestion {
+    padding: 10px;
+    cursor: pointer;
+}
+
+.suggestion:hover {
+    background-color: #f0f0f0;
+}
+
+#selected-course-info {
+    font-size: 20px;
+}
+
+#selected-course-info p {
+   font-weight: 600;
+}
+
+.mic-btn {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+}
+
+.mic-btn img {
+    width: 15px; /* Adjust the width as needed */
+    height: 25px;
+    vertical-align: middle;
+}
+/* Button style */
+
+#redirect-btn {
+    position: fixed; /* Fixed position */
+    top: 20px; /* Distance from top */
+    right: 20px; /* Distance from right */
+    background-color: blue; /* Blue background color */
+    color: white; /* White text color */
+    padding: 10px 20px; /* Padding */
+    border: none; /* No border */
+    cursor: pointer; /* Cursor style */
+    border-radius: 5px; /* Rounded corners */
+}
+
+#login-btn {
+    position: fixed; /* Fixed position */
+    top: 70px; /* Distance from top */
+    right: 20px; /* Distance from right */
+    color: white; /* White text color */
+    padding: 10px 20px; /* Padding */
+    border: none; /* No border */
+    cursor: pointer; /* Cursor style */
+    border-radius: 5px; /* Rounded corners */
+}
+
+#register-btn {
+    position: fixed; /* Fixed position */
+    top: 120px; /* Distance from top */
+    right: 20px; /* Distance from right */
+    color: white; /* White text color */
+    padding: 10px 20px; /* Padding */
+    border: none; /* No border */
+    cursor: pointer; /* Cursor style */
+    border-radius: 5px; /* Rounded corners */
+}
+/* Button hover effect */
+#redirect-btn:hover {
+    background-color: darkblue; /* Dark blue background color on hover */
+}
+
+#redirect-btn a{
+text-decoration: none;
+color:#fff;
+}
+
+.highlight {
+    background-color: yellow;
+}
+.no-match {
+    color: red;
+    text-align: center;
+    margin-top: 10px;
+}

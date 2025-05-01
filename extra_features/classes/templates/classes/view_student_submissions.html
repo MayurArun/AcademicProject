@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Submissions</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(to right, #00c6ff, #0072ff);
+            color: white;
+            height: 100vh; /* Full height */
+            overflow: hidden; /* Prevent scrolling */
+            display: flex;
+            flex-direction: column;
+        }
+        .container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+        h1 {
+            color: white; /* Heading color */
+        }
+        .list-group-item {
+            background-color: rgba(255, 255, 255, 0.1); /* Semi-transparent background */
+            color: white; /* Text color */
+            border: 1px solid rgba(255, 255, 255, 0.2); /* Light border */
+        }
+        .list-group-item a {
+            color: #00c6ff; /* Link color */
+        }
+        .list-group-item a:hover {
+            color: #ffdd57; /* Link hover color */
+        }
+        .footer {
+            position: fixed;
+            bottom: 10px;
+            left: 10px;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>My Submissions for {{ assignment.title }}</h1>
+        <div class="list-group mt-3">
+            {% for submission in submissions %}
+                <div class="list-group-item">
+                    <p><strong>Submitted At:</strong> {{ submission.submitted_at }}</p>
+                    <p>{{ submission.text }}</p>
+                    {% for file in submission.files.all %}
+                        <a href="{{ file.file.url }}" target="_blank">{{ file.file.name }}</a><br>
+                    {% endfor %}
+                    {% if submission.grade is not None %}
+                        <p><strong>Grade:</strong> {{ submission.grade }}</p>
+                    {% else %}
+                        <p><strong>Grade:</strong> Not graded yet.</p>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

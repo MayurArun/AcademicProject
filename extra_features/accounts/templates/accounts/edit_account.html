@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Account</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(to right, #00c6ff, #0072ff);
+            color: white;
+            height: 100vh; /* Full height */
+            display: flex;
+            flex-direction: column;
+        }
+        .container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px; /* Add padding for better spacing */
+        }
+        .form-control {
+            background-color: rgba(255, 255, 255, 0.1); /* Semi-transparent background for inputs */
+            color: white; /* Text color */
+        }
+        .form-control::placeholder {
+            color: rgba(255, 255, 255, 0.7); /* Placeholder color */
+        }
+        .form-group label {
+            color: white; /* Label color */
+        }
+        .btn-primary {
+            background-color: #007bff; /* Primary button color */
+            border-color: #007bff; /* Primary button border color */
+        }
+        .btn-secondary {
+            background-color: #6c757d; /* Secondary button color */
+            border-color: #6c757d; /* Secondary button border color */
+        }
+        .btn-warning {
+            background-color: #ffc107; /* Warning button color */
+            border-color: #ffc107; /* Warning button border color */
+        }
+        .btn-danger {
+            background-color: #dc3545; /* Danger button color */
+            border-color: #dc3545; /* Danger button border color */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Edit Account</h1>
+        <form id="editAccountForm" method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" class="form-control" id="username" name="username" value="{{ user.username }}" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" class="form-control" id="email" name="email" value="{{ user.email }}" required>
+            </div>
+
+            <!-- Password Fields -->
+            <div class="form-group">
+                <label for="password">New Password</label>
+                <input type="password" class="form-control" id="password" name="password">
+            </div>
+            <div class="form-group">
+                <label for="confirm_password">Confirm Password</label>
+                <input type="password" class="form-control" id="confirm_password" name="confirm_password">
+            </div>
+
+            {% if is_student %}
+                <div class="form-group">
+                    <label for="full_name">Full Name</label>
+                    <input type="text" class="form-control" id="full_name" name="full_name" value="{{ user.full_name }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="roll_number">Roll Number</label>
+                    <input type="text" class="form-control" id="roll_number" name="roll_number" value="{{ user.student.roll_number }}" required>
+                </div>
+            {% endif %}
+
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+        </form>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#editAccountForm').on('submit', function(event) {
+                event.preventDefault();
+
+                // Check password validity before submitting the form
+                var password = $('#password').val();
+                var confirmPassword = $('#confirm_password').val();
+
+                if (password && password !== confirmPassword) {
+                    alert('Passwords do not match.');
+                    return;
+                }
+
+                $.ajax({
+                    url: window.location.href,
+                    method: 'POST',
+                    data: $(this).serialize(),
+                    success: function(response) {
+                        if (response.status === 'success') {
+                            alert('Account updated successfully.');
+                            window.location.href = '/register';  // Redirect or to desired page
+                        } else {
+                            alert('An error occurred. Please try again.');
+                        }
+                    },
+                    error: function() {
+                        alert('An error occurred. Please try again.');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

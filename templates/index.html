@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recommendation System</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+
+    <style>
+    #auth-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 20px;
+}
+
+#auth-buttons a {
+    text-decoration: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 5px;
+    color: white;
+    text-align: center;
+    flex: 1 1 auto;
+    min-width: 120px;
+}
+
+#login-btn {
+    background-color: #17a2b8; /* Bootstrap info */
+}
+
+#register-btn {
+    background-color: #ffc107; /* Bootstrap warning */
+    color: black;
+}
+
+/* Mobile responsiveness */
+@media screen and (max-width: 768px) {
+    #auth-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+
+
+    #auth-buttons {
+        display: flex;
+        justify-content: flex-end;  /* Align the buttons to the right */
+        gap: 1px;                  /* Space between the buttons */
+        width: 30%;                /* Make the container full width */
+    }
+
+    #login-btn, #register-btn {
+        padding: 3px 6px;           /* Smaller padding */
+        font-size: 8px;            /* Smaller font size */
+        width: 10%;                 /* Reduced width of buttons */
+        text-align: center;         /* Center the text inside the buttons */
+    }
+
+    #login-btn {
+        background-color: #17a2b8; /* Bootstrap info color */
+    }
+
+    #register-btn {
+        background-color: #ffc107; /* Bootstrap warning color */
+        color: black;
+    }
+
+
+
+    #auth-buttons a {
+        width: 60%;               /* Reduced width to make buttons smaller */
+        font-size: 14px;          /* Smaller font */
+        padding: 6px 12px;        /* Reduced padding */
+        margin-bottom: 10px;
+    }
+
+    /* Search bar adjustments for mobile */
+    #search-bar {
+        width: 100%;
+        font-size: 16px;
+        padding: 10px;
+    }
+    #search-container {
+        display: flex;                /* Use flexbox for layout */
+        justify-content: space-between; /* Space between the search bar and mic button */
+        align-items: center;          /* Vertically center the elements */
+    }
+
+    #mic-btn {
+        background: transparent;      /* Transparent background */
+        border: none;                 /* Remove border */
+        cursor: pointer;              /* Pointer cursor on hover */
+    }
+
+    #mic-btn img {
+        width: 20px;                  /* Smaller mic icon */
+        height: 20px;                 /* Maintain the icon's aspect ratio */
+    }
+
+    #recommendation-image {
+        width: 50%;        /* Reduce image width to 80% of its container */
+        height: auto;      /* Maintain aspect ratio */
+        margin: 0 auto;    /* Center the image */
+        display: block;    /* Ensure it's a block element for centering */
+    }
+/* Base Styling for suggestions */
+#suggestions {
+    display: none;
+    margin-top: 10px;
+    background-color: #f9f9f9;
+    border: 1px solid #ccc;
+    padding: 10px;
+    max-height: 200px;
+    overflow-y: auto;
+    position: absolute; /* Position suggestions below the search bar */
+    width: 100%;
+    z-index: 1000;
+}
+
+.suggestion {
+    padding: 8px;
+    border-bottom: 1px solid #ddd;
+    cursor: pointer;
+}
+
+.suggestion:hover {
+    background-color: #f1f1f1;
+}
+
+/* For highlighting the matched text */
+.highlight {
+    background-color: yellow;
+}
+
+/* Mobile responsiveness for suggestions */
+@media screen and (max-width: 768px) {
+    /* Ensure suggestions align with the input box */
+    #suggestions {
+        width: 90%; /* Take 90% of the width on mobile */
+        left: 5%; /* Center it horizontally */
+    }
+
+    .suggestion {
+        font-size: 14px; /* Smaller font size for mobile */
+        padding: 10px; /* Increase padding for easier tapping */
+    }
+}
+
+}
+
+
+</style>
+</head>
+<body>
+ <!-- Navbar -->
+<<div id="container">
+        <img src="{{ url_for('static', filename='Collage Search Engine.png') }}" alt="Recommendation System" id="recommendation-image">
+        <br><br>
+        <div id="search-container">
+            <input type="text" id="search-bar" placeholder="Search for courses...">
+            <button id="mic-btn" class="mic-btn"><img src="{{ url_for('static', filename='mic.png') }}" alt="Microphone"></button>
+            <div id="suggestions"></div>
+        </div>
+
+<!--        <button id="redirect-btn" class="btn btn-success"><a href="/add-course">Add Course</a></button>-->
+        <a id="login-btn" href="http://localhost:8000"  class  ='btn btn-info'>
+            Login
+        </a>
+
+        <a id="register-btn" href="http://localhost:8000/register"  class  ='btn btn-warning'>
+            Register
+        </a>
+
+        <div id="mic-status"></div>
+        <div id="selected-course-info" style="display: none;">
+            <p id="course-id"></p>
+            <p id="course-title"></p>
+            <p id="course-url"></p>
+            <p id="course-subject"></p>
+        </div>
+    </div>
+<script>
+    $(document).ready(function() {
+
+        // Redirect button click event
+        $('#redirect-btn').click(function() {
+            window.location.href = '/addData.html'; // Redirect to another page
+        });
+
+        const searchInput = document.getElementById('search-bar');
+        const micBtn = document.getElementById('mic-btn');
+        const micStatus = document.getElementById('mic-status');
+        let isListening = false; // Flag to track microphone state
+
+        micBtn.addEventListener('click', function() {
+            if (!isListening) {
+                startSpeechRecognition();
+            } else {
+                stopSpeechRecognition();
+            }
+        });
+
+        function startSpeechRecognition() {
+            isListening = true;
+            micStatus.innerText = 'Listening...'; // Display listening message
+            micStatus.style.color = 'green'; // Change text color to indicate listening
+
+            // Start speech recognition
+            const recognition = new webkitSpeechRecognition() || new SpeechRecognition();
+            recognition.lang = 'en-US';
+
+            recognition.onresult = function(event) {
+                const transcript = event.results[0][0].transcript;
+                searchInput.value = transcript;
+                searchCourses(transcript);
+                stopSpeechRecognition();
+            };
+
+            recognition.onerror = function(event) {
+                console.error('Speech recognition error:', event.error);
+                stopSpeechRecognition();
+            };
+
+            recognition.start();
+        }
+
+        function stopSpeechRecognition() {
+            isListening = false;
+            micStatus.innerText = ''; // Clear message
+        }
+
+        $('#search-bar').keyup(function() {
+            const query = $(this).val();
+            if (query !== '') {
+                searchCourses(query);
+            } else {
+                $('#suggestions').hide();
+            }
+        });
+
+        function searchCourses(query) {
+            // Validate if the query contains special characters
+            if (/^[a-zA-Z0-9- ]*$/.test(query) == false) {
+                alert("Special characters are not allowed!");
+                $('#search-bar').val(''); // Clear search bar input
+                return; // Exit the function if special characters are found
+            }
+
+            $.ajax({
+                url: '/suggest',
+                method: 'POST',
+                data: {query: query},
+                success: function(data) {
+                    $('#suggestions').html('');
+                    if (data.length > 0) {
+                        data.forEach(function(suggestion) {
+                            var highlightedTitle = highlightQuery(suggestion.course_title, query);
+                            var suggestionHtml = '<div class="suggestion" data-course-id="' + suggestion.course_id + '" data-course-title="' + suggestion.course_title + '" data-course-url="' + suggestion.url + '" data-course-subject="' + suggestion.subject + '">' + suggestion.course_id + ' - ' + highlightedTitle + '</div>';
+                            $('#suggestions').append(suggestionHtml);
+                        });
+                        $('#suggestions').show();
+                    } else {
+                        $('#suggestions').append('<div class="no-match">No Match Found</div>');
+                        $('#suggestions').show();
+                    }
+                }
+            });
+        }
+
+        function highlightQuery(text, query) {
+            const regex = new RegExp(`(${query})`, 'gi');
+            return text.replace(regex, '<span class="highlight">$1</span>');
+        }
+
+        $(document).on('click', '.suggestion', function() {
+            var courseId = $(this).data('course-id');
+            var courseTitle = $(this).data('course-title');
+            $('#course-id').text('Course ID: ' + courseId);
+            $('#course-title').text('Course Title: ' + courseTitle);
+            $('#course-url').text('URL: ' + $(this).data('course-url'));
+            $('#course-subject').text('Subject: ' + $(this).data('course-subject'));
+            $('#selected-course-info').show();
+            $('#suggestions').hide();
+        });
+
+        $(document).on('click', '.suggestion', function() {
+            var url = $(this).data('course-url');
+            $('#course-url').html('<a href="' + url + '" target="_blank">URL: ' + url + '</a>');
+        });
+    });
+</script>
+
+
+</body>
+</html>

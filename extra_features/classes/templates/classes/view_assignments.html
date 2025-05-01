@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Assignments</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(to right, #00c6ff, #0072ff);
+            color: white;
+            height: 100vh; /* Full height */
+            display: flex;
+            flex-direction: column;
+        }
+        .container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px; /* Add padding for better spacing */
+        }
+        .list-group-item {
+            background-color: rgba(255, 255, 255, 0.1); /* Darker semi-transparent white */
+            color: white; /* Text color */
+            margin-bottom: 10px; /* Add space between items */
+        }
+        .btn-primary, .btn-secondary, .btn-info {
+            background-color: #007bff; /* Primary button color */
+            border-color: #007bff; /* Primary button border color */
+        }
+        h1 {
+            color: white; /* Heading color */
+        }
+        .top-buttons {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            gap: 10px;
+        }
+    </style>
+</head>
+<body>
+        <!-- Logout and Back to Dashboard Buttons -->
+        <div class="top-buttons">
+            <a href="/logout/" class="btn btn-danger btn-sm">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        {% if class.teacher.id == request.session.user_id %}
+        <!-- Teacher: Main Dashboard -->
+        <a href="/teacher_dashboard/" class="btn btn-warning btn-sm">
+            <i class="fas fa-home"></i> Main Dashboard
+        </a>
+    {% else %}
+        <!-- Student: Main Dashboard -->
+        <a href="/student_dashboard/" class="btn btn-warning btn-sm">
+            <i class="fas fa-home"></i> Main Dashboard
+        </a>
+    {% endif %}
+        </div>
+
+    <div class="container">
+        <h1>Assignments for {{ class.name }}</h1>
+        {% if user.role.name == 'Teacher' %}
+            <a href="/classes/create_assignment/{{ class.class_code }}/" class="btn btn-primary">Create Assignment</a>
+        {% endif %}
+        <div class="list-group mt-3">
+            {% for assignment in assignments %}
+                <div class="list-group-item">
+                    <h5>{{ assignment.title }}</h5>
+                    <p>{{ assignment.description }}</p>
+                    <p><strong>Due Date:</strong> {{ assignment.due_date }}</p>
+                    {% if user.role.name == 'Student' %}
+                        <a href="/classes/submit_assignment/{{ assignment.id }}/" class="btn btn-secondary">Submit Assignment</a>
+                        <a href="/classes/view_student_submissions/{{ assignment.id }}/" class="btn btn-info">View My Submissions</a>
+                    {% elif user.role.name == 'Teacher' %}
+                        <a href="/classes/view_submissions/{{ assignment.id }}/" class="btn btn-info">View Submissions</a>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>
